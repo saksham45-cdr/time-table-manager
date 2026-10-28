@@ -1,0 +1,656 @@
+/* ============================================================
+   RESET AND BASE STYLES
+============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    color: #2d3748;
+    background: #f7fafc;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   APP LAYOUT: sidebar + main area side by side
+============================================================ */
+.app-container {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    min-height: 100vh;
+}
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+.sidebar {
+    background: #1e3a5f;
+    color: #c5d8e8;
+    display: flex;
+    flex-direction: column;
+    /* stays visible while main content scrolls */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 16px;
+    border-bottom: 1px solid #2c5282;
+}
+
+.logo-icon {
+    width: 30px;
+    height: 30px;
+    background: #2b6cb0;
+    color: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 12px 0;
+}
+
+.nav-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 13px;
+    transition: background 0.15s;
+}
+
+.nav-item:hover {
+    background: #2c5282;
+    color: white;
+}
+
+.nav-item.active {
+    background: #2b6cb0;
+    color: white;
+    font-weight: 600;
+    border-left: 3px solid #63b3ed;
+    padding-left: 13px;
+}
+
+/* ============================================================
+   MAIN CONTENT
+============================================================ */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: #f7fafc;
+}
+
+/* ============================================================
+   TOP HEADER
+============================================================ */
+.top-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    /* stays at top while content scrolls */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.header-title h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a202c;
+}
+
+.header-title p {
+    font-size: 12px;
+    color: #718096;
+    margin-top: 2px;
+}
+
+.header-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   BUTTONS AND FORM CONTROLS
+============================================================ */
+select {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 13px;
+    background: white;
+    color: #2d3748;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #4299e1;
+}
+
+.btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+
+.btn-primary {
+    background: #2b6cb0;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2c5282;
+}
+
+.btn-secondary {
+    background: white;
+    color: #2b6cb0;
+    border: 1px solid #2b6cb0;
+}
+
+.btn-secondary:hover {
+    background: #ebf8ff;
+}
+
+.btn-small {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+/* ============================================================
+   VIEW CONTAINER AND VIEWS
+============================================================ */
+.view-container {
+    flex: 1;
+    padding: 20px 24px;
+}
+
+/* All views hidden by default */
+.view {
+    display: none;
+}
+
+/* Only the active view is shown */
+.view.active {
+    display: block;
+}
+
+/* ============================================================
+   TIMETABLE GRID
+============================================================ */
+.timetable-wrapper {
+    overflow-x: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+}
+
+.timetable {
+    border-collapse: collapse;
+    width: 100%;
+    /* allows horizontal scroll on small screens */
+    min-width: 700px;
+}
+
+.timetable th {
+    background: #ebf8ff;
+    color: #2c5282;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #bee3f8;
+    white-space: nowrap;
+}
+
+.timetable td {
+    border: 1px solid #e2e8f0;
+    padding: 6px;
+    vertical-align: top;
+    /* fixed width so each day column is equal */
+    min-width: 120px;
+    height: 72px;
+}
+
+/* First column: time labels */
+.time-col {
+    min-width: 90px;
+    max-width: 90px;
+    background: #f7fafc;
+    font-weight: 500;
+    font-size: 12px;
+    color: #4a5568;
+    text-align: center;
+    vertical-align: middle !important;
+    white-space: nowrap;
+}
+
+/* Course card inside a timetable cell */
+.course-card {
+    border-radius: 4px;
+    padding: 5px 7px;
+    height: 100%;
+    min-height: 58px;
+}
+
+.course-card .course-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: #1a202c;
+}
+
+.course-card .course-meta {
+    font-size: 11px;
+    color: #4a5568;
+    margin-top: 2px;
+}
+
+/* Dash shown in empty timetable cells */
+.empty-cell {
+    color: #cbd5e0;
+    font-size: 18px;
+    text-align: center;
+    padding-top: 16px;
+}
+
+/* ============================================================
+   NOTICE BAR
+============================================================ */
+.notice {
+    background: #ebf8ff;
+    border-left: 3px solid #4299e1;
+    padding: 10px 14px;
+    margin: 16px 0;
+    font-size: 12px;
+    color: #2c5282;
+    border-radius: 0 4px 4px 0;
+}
+
+.notice code {
+    background: #bee3f8;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+}
+
+/* ============================================================
+   SUMMARY CARDS
+============================================================ */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 0 0 20px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card .card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2b6cb0;
+    line-height: 1.2;
+}
+
+.summary-card .card-label {
+    font-size: 12px;
+    color: #718096;
+    margin-top: 4px;
+}
+
+/* ============================================================
+   ALGORITHM COMPARISON SECTION
+============================================================ */
+.algo-section {
+    margin: 0 0 20px;
+}
+
+.algo-section h3 {
+    font-size: 15px;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+.algo-note {
+    font-size: 12px;
+    color: #718096;
+    margin: 4px 0 12px;
+}
+
+.algo-note code {
+    background: #f0f4f8;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #d53f8c;
+    font-family: 'Courier New', monospace;
+}
+
+.algo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.algo-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.algo-card h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #2c5282;
+    font-weight: 600;
+}
+
+.algo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.algo-table td {
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #4a5568;
+}
+
+.algo-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #2b6cb0;
+}
+
+.algo-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Small badge shown next to section headings */
+.demo-badge {
+    font-size: 10px;
+    background: #fef3c7;
+    color: #b45309;
+    padding: 2px 7px;
+    border-radius: 10px;
+    vertical-align: middle;
+    margin-left: 6px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   CONFLICT PANEL
+============================================================ */
+.conflict-panel {
+    background: white;
+    border: 1px solid #feb2b2;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 0 0 20px;
+}
+
+.conflict-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.conflict-header h3 {
+    font-size: 14px;
+    color: #c53030;
+}
+
+.conflict-count {
+    font-size: 12px;
+    color: #718096;
+    margin: 4px 0 10px;
+}
+
+.conflict-list {
+    list-style: none;
+    padding: 0;
+}
+
+.conflict-list li {
+    padding: 7px 0;
+    border-bottom: 1px solid #fff5f5;
+    font-size: 12px;
+    color: #2d3748;
+    line-height: 1.5;
+}
+
+.conflict-list li:last-child {
+    border-bottom: none;
+}
+
+.severity-high {
+    color: #c53030;
+    font-weight: 600;
+}
+
+.severity-medium {
+    color: #c05621;
+    font-weight: 600;
+}
+
+/* ============================================================
+   DATA TABLES (Courses, Faculty, Rooms views)
+============================================================ */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.data-table th {
+    background: #ebf8ff;
+    color: #2c5282;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid #bee3f8;
+}
+
+.data-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f0f4f8;
+    font-size: 13px;
+    color: #2d3748;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tr:hover td {
+    background: #f7fafc;
+}
+
+/* ============================================================
+   FORM SECTIONS (add course / add room)
+============================================================ */
+.form-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.form-section h4 {
+    font-size: 13px;
+    color: #2c5282;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.form-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.form-row input {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #2d3748;
+    background: white;
+    /* min-width ensures inputs are usable */
+    min-width: 140px;
+}
+
+.form-row input:focus {
+    outline: none;
+    border-color: #4299e1;
+}
+
+/* Section heading style used in Courses, Faculty, Rooms views */
+.view > h2 {
+    font-size: 17px;
+    color: #1a202c;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+
+/* ============================================================
+   GENERATE TIMETABLE MODAL
+============================================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 460px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal h3 {
+    font-size: 16px;
+    color: #1a202c;
+    margin-bottom: 12px;
+}
+
+.modal p {
+    font-size: 13px;
+    color: #4a5568;
+    margin: 8px 0;
+}
+
+.modal ol {
+    font-size: 13px;
+    color: #4a5568;
+    padding-left: 20px;
+    margin: 8px 0;
+}
+
+.modal ol li {
+    margin-bottom: 4px;
+}
+
+.modal code {
+    background: #f0f4f8;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #d53f8c;
+    font-family: 'Courier New', monospace;
+}
+
+.modal .btn {
+    margin-top: 16px;
+}
+
+/* ============================================================
+   RESPONSIVE: narrow screens
+============================================================ */
+@media (max-width: 768px) {
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+        height: auto;
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .algo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header-controls {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+}

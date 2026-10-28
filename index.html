@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Timetable Optimizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- ======================================================
+         LEFT SIDEBAR
+    ====================================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">U</div>
+            <span class="logo-text">UniSchedule</span>
+        </div>
+
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="nav-item active" data-view="timetable">Dashboard</li>
+                <li class="nav-item"        data-view="timetable">Timetable Builder</li>
+                <li class="nav-item"        data-view="courses">Courses</li>
+                <li class="nav-item"        data-view="faculty">Faculty</li>
+                <li class="nav-item"        data-view="rooms">Rooms</li>
+                <li class="nav-item"        data-view="reports">Reports</li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- ======================================================
+         MAIN CONTENT AREA
+    ====================================================== -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-title">
+                <h1>Timetable Builder</h1>
+                <p>Design and manage academic schedules</p>
+            </div>
+            <div class="header-controls">
+                <select id="semester-select">
+                    <option>Semester 5 - 2024</option>
+                    <option>Semester 6 - 2024</option>
+                    <option>Semester 7 - 2025</option>
+                </select>
+                <select id="department-select">
+                    <option>CSE - B.Tech</option>
+                    <option>ECE - B.Tech</option>
+                    <option>ME  - B.Tech</option>
+                    <option>CE  - B.Tech</option>
+                </select>
+                <button class="btn btn-primary" id="generate-btn">Generate Timetable</button>
+                <button class="btn btn-secondary" id="conflict-btn">Check Conflicts</button>
+            </div>
+        </header>
+
+        <!-- All page views live inside this container -->
+        <div class="view-container">
+
+            <!-- ================================================
+                 VIEW: TIMETABLE (default view, also for Dashboard)
+            ================================================ -->
+            <section id="view-timetable" class="view active">
+
+                <!-- Timetable grid -->
+                <div class="timetable-wrapper">
+                    <table class="timetable">
+                        <thead>
+                            <tr>
+                                <th class="time-col">Time</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timetable-body">
+                            <!-- Rows are inserted by renderTimetable() in script.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Notice: sample data disclaimer -->
+                <div class="notice">
+                    Showing demonstration data. Connect the C++ backend to display real scheduled results.
+                </div>
+
+                <!-- Summary cards -->
+                <div class="summary-cards" id="summary-cards">
+                    <!-- Cards are inserted by renderSummaryCards() in script.js -->
+                </div>
+
+                <!-- Algorithm comparison -->
+                <div class="algo-section">
+                    <h3>Algorithm Comparison <span class="demo-badge">Demo Data</span></h3>
+                    <p class="algo-note">
+                        These fields show "--" because the algorithms are not implemented yet.
+                        Once you implement the functions in <code>backend/scheduler.cpp</code>
+                        and <code>backend/graph.cpp</code>, replace these values with real results.
+                    </p>
+                    <div class="algo-grid">
+
+                        <div class="algo-card">
+                            <h4>Greedy Scheduling</h4>
+                            <table class="algo-table">
+                                <tr><td>Exams Scheduled</td><td id="greedy-scheduled">--</td></tr>
+                                <tr><td>Time Slots Used</td><td id="greedy-slots">--</td></tr>
+                                <tr><td>Conflicts</td>       <td id="greedy-conflicts">--</td></tr>
+                                <tr><td>Execution Time</td>  <td id="greedy-time">-- ms</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="algo-card">
+                            <h4>Improved Scheduling (Heap + Backtracking)</h4>
+                            <table class="algo-table">
+                                <tr><td>Exams Scheduled</td><td id="improved-scheduled">--</td></tr>
+                                <tr><td>Time Slots Used</td><td id="improved-slots">--</td></tr>
+                                <tr><td>Conflicts</td>       <td id="improved-conflicts">--</td></tr>
+                                <tr><td>Execution Time</td>  <td id="improved-time">-- ms</td></tr>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Conflict detection panel (hidden until Check Conflicts is clicked) -->
+                <div class="conflict-panel" id="conflict-panel" style="display: none;">
+                    <div class="conflict-header">
+                        <h3>Conflict Detection Results <span class="demo-badge">Demonstration</span></h3>
+                        <button class="btn btn-small btn-secondary" id="close-conflict-btn">Close</button>
+                    </div>
+                    <p class="algo-note">
+                        These are sample conflicts for demonstration only.
+                        Connect the C++ backend for real graph-based conflict detection.
+                    </p>
+                    <div id="conflict-count" class="conflict-count"></div>
+                    <ul id="conflict-list" class="conflict-list">
+                        <!-- Items inserted by renderConflictPanel() in script.js -->
+                    </ul>
+                </div>
+
+            </section>
+
+            <!-- ================================================
+                 VIEW: COURSES
+            ================================================ -->
+            <section id="view-courses" class="view">
+                <h2>Courses</h2>
+
+                <!-- Add course form -->
+                <div class="form-section">
+                    <h4>Add New Course</h4>
+                    <div class="form-row">
+                        <input type="text"   id="new-course-id"     placeholder="Course ID (e.g. CS305)">
+                        <input type="text"   id="new-course-name"   placeholder="Course Name">
+                        <input type="text"   id="new-faculty-id"    placeholder="Faculty ID (e.g. F07)">
+                        <input type="number" id="new-student-count" placeholder="Student Count">
+                        <button class="btn btn-primary" id="add-course-btn">Add Course</button>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Course ID</th>
+                            <th>Course Name</th>
+                            <th>Faculty ID</th>
+                            <th>Students</th>
+                        </tr>
+                    </thead>
+                    <tbody id="courses-body">
+                        <!-- Rows inserted by renderCoursesTable() in script.js -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ================================================
+                 VIEW: FACULTY
+            ================================================ -->
+            <section id="view-faculty" class="view">
+                <h2>Faculty</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Faculty ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Course Assigned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="faculty-body">
+                        <!-- Rows inserted by renderFacultyTable() in script.js -->
+                    </tbody>
+                </table>
+                <div class="notice" style="margin-top: 16px;">
+                    Faculty editing is not implemented. Add entries manually in the
+                    <code>faculty</code> array in <code>script.js</code> when needed.
+                </div>
+            </section>
+
+            <!-- ================================================
+                 VIEW: ROOMS
+            ================================================ -->
+            <section id="view-rooms" class="view">
+                <h2>Rooms</h2>
+
+                <!-- Add room form -->
+                <div class="form-section">
+                    <h4>Add New Room</h4>
+                    <div class="form-row">
+                        <input type="text"   id="new-room-id"       placeholder="Room ID (e.g. D401)">
+                        <input type="text"   id="new-room-name"     placeholder="Room Name">
+                        <input type="number" id="new-room-capacity" placeholder="Capacity">
+                        <button class="btn btn-primary" id="add-room-btn">Add Room</button>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Room ID</th>
+                            <th>Room Name</th>
+                            <th>Capacity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rooms-body">
+                        <!-- Rows inserted by renderRoomsTable() in script.js -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ================================================
+                 VIEW: REPORTS (placeholder)
+            ================================================ -->
+            <section id="view-reports" class="view">
+                <h2>Reports</h2>
+                <div class="notice">
+                    Reports view is not implemented yet.
+                    After implementing the scheduling algorithms in the C++ backend,
+                    add summary statistics and comparison charts here.
+                </div>
+            </section>
+
+        </div><!-- end .view-container -->
+
+    </main><!-- end .main-content -->
+</div><!-- end .app-container -->
+
+<!-- ======================================================
+     GENERATE TIMETABLE MODAL
+     Explains that generation requires the C++ backend.
+====================================================== -->
+<div class="modal-overlay" id="generate-modal" style="display: none;">
+    <div class="modal">
+        <h3>Generate Timetable</h3>
+        <p>Timetable generation is handled by the C++ backend algorithms.</p>
+        <p>To use this feature:</p>
+        <ol>
+            <li>Implement the scheduling algorithms in <code>backend/scheduler.cpp</code></li>
+            <li>Build the conflict graph in <code>backend/graph.cpp</code></li>
+            <li>Compile and run <code>backend/main.cpp</code></li>
+            <li>Copy the schedule output into the <code>scheduleData</code> object in <code>script.js</code></li>
+        </ol>
+        <p>The demonstration timetable is shown for now.</p>
+        <button class="btn btn-primary" id="close-generate-btn">OK, Show Demo Timetable</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,13 +1,18 @@
 // ============================================================
-// SAMPLE DATA
-// This data is used to demonstrate the UI.
-// When you implement the C++ backend algorithms, replace the
-// contents of scheduleData with real results from your program.
+// DATA LAYER
+// Demo data below is shown until the C++ backend has produced
+// backend_data.js (see backend/export.cpp). index.html loads
+// backend_data.js, if present, before this file — when it defines
+// `backendData`, we transform it into the same shapes the demo
+// data uses below, so every render function works unchanged.
 // The data structures here mirror the structs in backend/data.h.
 // ============================================================
 
+// Whether backend/main.cpp has actually run and produced output.
+const usingRealData = (typeof backendData !== 'undefined');
+
 // Available time slot labels (must match keys used in scheduleData below)
-const TIME_SLOTS = [
+const TIME_SLOTS = usingRealData ? backendData.slotLabels : [
     '9-10 AM',
     '10-11 AM',
     '11 AM-12 PM',
@@ -19,8 +24,9 @@ const TIME_SLOTS = [
 // Day column labels
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-// List of courses — mirrors Course struct in data.h
-const courses = [
+// ---- Demo data (used only when backendData is not present) ----
+
+const demoCourses = [
     { id: 'CS301', name: 'Data Structures',     facultyId: 'F01', students: 60 },
     { id: 'CS302', name: 'Operating Systems',   facultyId: 'F02', students: 58 },
     { id: 'CS303', name: 'Computer Networks',   facultyId: 'F03', students: 55 },
@@ -29,8 +35,7 @@ const courses = [
     { id: 'EE301', name: 'Digital Electronics', facultyId: 'F06', students: 50 },
 ];
 
-// List of faculty — mirrors Faculty struct in data.h
-const faculty = [
+const demoFaculty = [
     { id: 'F01', name: 'Dr. R. Sharma', dept: 'CSE',         course: 'CS301' },
     { id: 'F02', name: 'Dr. S. Mehta',  dept: 'CSE',         course: 'CS302' },
     { id: 'F03', name: 'Dr. A. Kumar',  dept: 'CSE',         course: 'CS303' },
@@ -39,8 +44,7 @@ const faculty = [
     { id: 'F06', name: 'Dr. K. Patel',  dept: 'ECE',         course: 'EE301' },
 ];
 
-// List of rooms — mirrors Room struct in data.h
-const rooms = [
+const demoRooms = [
     { id: 'A101', name: 'Lab A-101',  capacity: 60 },
     { id: 'A102', name: 'Room A-102', capacity: 70 },
     { id: 'B201', name: 'Room B-201', capacity: 65 },
@@ -48,10 +52,7 @@ const rooms = [
     { id: 'C301', name: 'Room C-301', capacity: 80 },
 ];
 
-// Weekly timetable: scheduleData[day][slot] holds one scheduled session.
-// Each session has the course name, faculty name, room, and a background color.
-// This is DEMONSTRATION DATA. Replace with real backend output when ready.
-const scheduleData = {
+const demoScheduleData = {
     'Monday': {
         '9-10 AM':    { course: 'Data Structures',     faculty: 'Dr. R. Sharma', room: 'A101', color: '#dbeafe' },
         '10-11 AM':   { course: 'Mathematics III',     faculty: 'Dr. P. Gupta',  room: 'A102', color: '#dcfce7' },
@@ -85,8 +86,8 @@ const scheduleData = {
 
 // Sample conflicts for the conflict panel.
 // These are fabricated for demonstration only.
-// Your C++ buildConflictGraph() will detect real conflicts.
-const sampleConflicts = [
+// backend/graph.cpp's buildConflictGraph() detects the real conflicts below.
+const demoConflicts = [
     {
         type: 'Student Overlap',
         desc: 'CS301 (Data Structures) and MA301 (Mathematics III) share common students — both appear in the Monday 9-10 AM slot.',
@@ -103,6 +104,86 @@ const sampleConflicts = [
         severity: 'medium'
     },
 ];
+
+// ---- Real data (used only when backendData is present) ----
+// Transforms backend/export.cpp's output into the same shapes as the
+// demo data above, so every render function below works unchanged.
+
+// A small fixed palette so each course gets a stable colour in the grid.
+const REAL_COURSE_COLORS = ['#dbeafe', '#dcfce7', '#ede9fe', '#fef9c3', '#ffe4e6', '#fef3c7'];
+
+function buildRealCourses() {
+    return backendData.exams.map(function (e) {
+        return { id: e.courseCode, name: e.courseName, facultyId: e.invigilatorId, students: e.studentCount };
+    });
+}
+
+function buildRealFaculty() {
+    return backendData.faculty.map(function (f) {
+        const taught = backendData.exams
+            .filter(function (e) { return e.invigilatorId === f.id; })
+            .map(function (e) { return e.courseCode; })
+            .join(', ');
+        return { id: f.id, name: f.name, dept: '—', course: taught || '—' };
+    });
+}
+
+function buildRealRooms() {
+    return backendData.rooms.map(function (r) {
+        return { id: r.name, name: r.name, capacity: r.capacity };
+    });
+}
+
+// The backend schedules into time slots only (no day-of-week concept), so
+// the real schedule is shown on a single day column. We use the Greedy
+// result here; both algorithms' stats appear in the comparison cards below.
+// Because different exams can share a slot in different rooms, each cell
+// holds an ARRAY of sessions (unlike the demo data, which has one per cell).
+function buildRealScheduleData() {
+    const data = { 'Monday': {} };
+
+    backendData.greedy.schedule.forEach(function (entry) {
+        if (!entry.scheduled) return;
+
+        const exam = backendData.exams[entry.examIndex];
+        const room = backendData.rooms[entry.roomIndex];
+        const facultyMember = backendData.faculty.find(function (f) { return f.id === exam.invigilatorId; });
+        const slotLabel = backendData.slotLabels[entry.timeSlot];
+
+        if (!data['Monday'][slotLabel]) {
+            data['Monday'][slotLabel] = [];
+        }
+
+        data['Monday'][slotLabel].push({
+            course: exam.courseName,
+            faculty: facultyMember ? facultyMember.name : 'Unknown',
+            room: room ? room.name : 'Unknown',
+            color: REAL_COURSE_COLORS[entry.examIndex % REAL_COURSE_COLORS.length]
+        });
+    });
+
+    return data;
+}
+
+function buildRealConflicts() {
+    return backendData.conflicts.map(function (c) {
+        const examA = backendData.exams[c.examA];
+        const examB = backendData.exams[c.examB];
+        return {
+            type: c.reason,
+            desc: examA.courseCode + ' (' + examA.courseName + ') and ' +
+                  examB.courseCode + ' (' + examB.courseName + '): ' + c.reason + '.',
+            severity: c.reason.indexOf('invigilator') !== -1 ? 'high' : 'medium'
+        };
+    });
+}
+
+// ---- Final data used by the app: real data when available, demo otherwise ----
+const courses = usingRealData ? buildRealCourses() : demoCourses;
+const faculty = usingRealData ? buildRealFaculty() : demoFaculty;
+const rooms = usingRealData ? buildRealRooms() : demoRooms;
+const scheduleData = usingRealData ? buildRealScheduleData() : demoScheduleData;
+const sampleConflicts = usingRealData ? buildRealConflicts() : demoConflicts;
 
 // ============================================================
 // TIMETABLE RENDERING
@@ -127,21 +208,27 @@ function renderTimetable() {
         for (const day of DAYS) {
             const cell = document.createElement('td');
 
-            // Check if there is a scheduled session for this day + slot
-            const entry = scheduleData[day] && scheduleData[day][slot];
+            // Check if there is a scheduled session for this day + slot.
+            // Demo data has one entry per cell; real data can have several
+            // (different exams, different rooms, same time slot), so always
+            // work with an array here.
+            const raw = scheduleData[day] && scheduleData[day][slot];
+            const entries = Array.isArray(raw) ? raw : (raw ? [raw] : []);
 
-            if (entry) {
-                // Render a coloured course card
-                const card = document.createElement('div');
-                card.classList.add('course-card');
-                card.style.backgroundColor = entry.color;
+            if (entries.length > 0) {
+                for (const entry of entries) {
+                    // Render a coloured course card
+                    const card = document.createElement('div');
+                    card.classList.add('course-card');
+                    card.style.backgroundColor = entry.color;
 
-                card.innerHTML =
-                    '<div class="course-name">' + entry.course + '</div>' +
-                    '<div class="course-meta">' + entry.faculty + '</div>' +
-                    '<div class="course-meta">Room: ' + entry.room + '</div>';
+                    card.innerHTML =
+                        '<div class="course-name">' + entry.course + '</div>' +
+                        '<div class="course-meta">' + entry.faculty + '</div>' +
+                        '<div class="course-meta">Room: ' + entry.room + '</div>';
 
-                cell.appendChild(card);
+                    cell.appendChild(card);
+                }
             } else {
                 // Empty cell marker
                 const empty = document.createElement('div');
@@ -167,7 +254,10 @@ function countScheduledSessions() {
     let total = 0;
     for (const day of DAYS) {
         if (scheduleData[day]) {
-            total += Object.keys(scheduleData[day]).length;
+            for (const slot of Object.keys(scheduleData[day])) {
+                const raw = scheduleData[day][slot];
+                total += Array.isArray(raw) ? raw.length : 1;
+            }
         }
     }
     return total;
@@ -193,7 +283,7 @@ function renderSummaryCards() {
         { label: 'Total Courses',       value: courses.length },
         { label: 'Sessions Scheduled',  value: countScheduledSessions() },
         { label: 'Time Slots Used',     value: countUsedSlots() + ' / ' + TIME_SLOTS.length },
-        { label: 'Sample Conflicts',    value: sampleConflicts.length },
+        { label: usingRealData ? 'Conflicts Detected' : 'Sample Conflicts', value: sampleConflicts.length },
     ];
 
     container.innerHTML = '';
@@ -366,7 +456,7 @@ function renderConflictPanel() {
     }
 
     document.getElementById('conflict-count').textContent =
-        sampleConflicts.length + ' conflict(s) found in demonstration data.';
+        sampleConflicts.length + ' conflict(s) found in ' + (usingRealData ? 'the real conflict graph.' : 'demonstration data.');
 }
 
 function initConflictButton() {
@@ -417,13 +507,65 @@ function initGenerateButton() {
 }
 
 // ============================================================
+// DATA SOURCE UI
+// Swaps notice text and "Demo Data" badges depending on whether
+// backend_data.js (real backend output) was loaded.
+// ============================================================
+
+function renderDataSourceUI() {
+    const notice = document.getElementById('data-source-notice');
+    const algoBadge = document.getElementById('algo-badge');
+    const algoNote = document.getElementById('algo-note-text');
+    const conflictBadge = document.getElementById('conflict-badge');
+    const conflictNote = document.getElementById('conflict-note-text');
+    const generateModalStatus = document.getElementById('generate-modal-status');
+
+    if (usingRealData) {
+        notice.textContent = 'Showing real output from backend/main.cpp (Monday column = backend time slots).';
+        algoBadge.textContent = 'Live Backend Data';
+        algoNote.textContent = 'These values come directly from backend_data.js, generated the last time backend/main.cpp was run.';
+        conflictBadge.textContent = 'Live Backend Data';
+        conflictNote.textContent = 'These conflicts were detected by backend/graph.cpp\'s buildConflictGraph().';
+        generateModalStatus.textContent = 'The timetable above is live backend output. Re-run backend/main.cpp and reload the page to refresh it.';
+    } else {
+        notice.textContent = 'Showing demonstration data. Compile and run backend/main.cpp to generate backend_data.js with real results.';
+    }
+}
+
+// ============================================================
+// ALGORITHM COMPARISON CARDS
+// Filled in with real numbers once backend_data.js is loaded.
+// ============================================================
+
+function renderAlgoComparison() {
+    if (!usingRealData) return;
+
+    function fill(prefix, result) {
+        const scheduledCount = result.schedule.filter(function (s) { return s.scheduled; }).length;
+        const slotsUsed = new Set(
+            result.schedule.filter(function (s) { return s.scheduled; }).map(function (s) { return s.timeSlot; })
+        ).size;
+
+        document.getElementById(prefix + '-scheduled').textContent = scheduledCount + ' / ' + result.schedule.length;
+        document.getElementById(prefix + '-slots').textContent = slotsUsed + ' / ' + backendData.slotLabels.length;
+        document.getElementById(prefix + '-conflicts').textContent = backendData.conflicts.length;
+        document.getElementById(prefix + '-time').textContent = result.executionTimeMs.toFixed(4) + ' ms';
+    }
+
+    fill('greedy', backendData.greedy);
+    fill('improved', backendData.priority);
+}
+
+// ============================================================
 // INITIALISE
 // Called once when the page finishes loading.
 // ============================================================
 
 function init() {
+    renderDataSourceUI();
     renderTimetable();
     renderSummaryCards();
+    renderAlgoComparison();
     renderCoursesTable();
     renderFacultyTable();
     renderRoomsTable();

@@ -244,7 +244,12 @@ select:focus {
     vertical-align: top;
     /* fixed width so each day column is equal */
     min-width: 120px;
-    height: 72px;
+    min-height: 72px;
+}
+
+/* Stack multiple sessions (e.g. different rooms, same time slot) in one cell */
+.course-card + .course-card {
+    margin-top: 4px;
 }
 
 /* First column: time labels */

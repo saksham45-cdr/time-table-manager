@@ -11,6 +11,7 @@
 | `graph.cpp`     | Conflict graph construction (TODO) and DFS traversal (TODO).         |
 | `scheduler.h`   | Declarations for all scheduling algorithm functions.                 |
 | `scheduler.cpp` | Scheduling algorithm stubs — greedy, heap, backtracking (all TODO).  |
+| `export.h` / `export.cpp` | Writes the computed results to `../backend_data.js` for the frontend. Does not implement or change any algorithm. |
 
 ---
 
@@ -20,19 +21,19 @@ Open a terminal inside the `backend/` directory.
 
 ### Linux / macOS
 ```bash
-g++ -std=c++17 -o scheduler main.cpp data.cpp graph.cpp scheduler.cpp
+g++ -std=c++17 -o scheduler main.cpp data.cpp graph.cpp scheduler.cpp export.cpp
 ./scheduler
 ```
 
 ### Windows (MinGW / Git Bash)
 ```cmd
-g++ -std=c++17 -o scheduler.exe main.cpp data.cpp graph.cpp scheduler.cpp
+g++ -std=c++17 -o scheduler.exe main.cpp data.cpp graph.cpp scheduler.cpp export.cpp
 scheduler.exe
 ```
 
 ### Windows (MSVC via Developer Command Prompt)
 ```cmd
-cl /std:c++17 /EHsc main.cpp data.cpp graph.cpp scheduler.cpp /Fe:scheduler.exe
+cl /std:c++17 /EHsc main.cpp data.cpp graph.cpp scheduler.cpp export.cpp /Fe:scheduler.exe
 scheduler.exe
 ```
 
@@ -83,21 +84,21 @@ The following functions have `// TODO` comments explaining what to do.
 
 ## Connecting the Backend to the Frontend
 
-1. Run the C++ program and choose option 3 or 4.
-2. Note the schedule output printed to the terminal.
-3. Open `script.js` in the project root.
-4. Update the `scheduleData` object at the top of the file with the real results.
-5. Reload `index.html` in the browser to see the real schedule.
+This is now automatic — `main.cpp` calls `exportResultsToJS()` (in `export.cpp`)
+after it runs both scheduling algorithms, which writes `../backend_data.js`
+(the project root, next to `index.html`).
 
-The frontend `scheduleData` format is:
-```js
-scheduleData['Monday']['9-10 AM'] = {
-    course:  'Data Structures',
-    faculty: 'Dr. R. Sharma',
-    room:    'A101',
-    color:   '#dbeafe'
-};
-```
+1. From inside `backend/`, compile and run the program (see above) —
+   this (re)generates `backend_data.js` with your current sample data
+   and schedule results.
+2. Open or reload `index.html` in the browser.
+3. `index.html` loads `backend_data.js` before `script.js`. When present,
+   `script.js` replaces every demo table/timetable/conflict list with the
+   real backend output automatically — no manual copy-pasting needed.
+
+`export.cpp` only *writes* the data that `main.cpp` already computed; it does
+not implement or change any algorithm in `data.cpp`, `graph.cpp` or
+`scheduler.cpp`.
 
 Slot index to label mapping:
 | Index | Label         |

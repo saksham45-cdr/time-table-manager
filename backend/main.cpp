@@ -4,6 +4,8 @@
 #include "data.h"
 #include "graph.h"
 #include "scheduler.h"
+#include "export.h"
+#include <chrono>
 
 int main(){
     Exam exams [MAX_EXAMS] {};
@@ -42,6 +44,7 @@ cout << "\n===== GREEDY SCHEDULING =====\n";
 
 ScheduleEntry schedule[MAX_EXAMS]{};
 
+auto greedyStart = chrono::high_resolution_clock::now();
 bool success = greedySchedule(
     exams,
     examCount,
@@ -51,6 +54,8 @@ bool success = greedySchedule(
     schedule,
     MAX_SLOTS
 );
+auto greedyEnd = chrono::high_resolution_clock::now();
+double greedyTimeMs = chrono::duration<double, milli>(greedyEnd - greedyStart).count();
 
 if (success) {
     cout << "All exams scheduled successfully.\n";
@@ -69,6 +74,7 @@ cout << "\n===== PRIORITY-BASED SCHEDULING =====\n";
 
 ScheduleEntry priorityResult[MAX_EXAMS]{};
 
+auto priorityStart = chrono::high_resolution_clock::now();
 bool prioritySuccess = prioritySchedule(
     exams,
     examCount,
@@ -78,6 +84,8 @@ bool prioritySuccess = prioritySchedule(
     priorityResult,
     MAX_SLOTS
 );
+auto priorityEnd = chrono::high_resolution_clock::now();
+double priorityTimeMs = chrono::duration<double, milli>(priorityEnd - priorityStart).count();
 
 if (prioritySuccess) {
     cout << "All exams scheduled successfully.\n";
@@ -92,5 +100,16 @@ displaySchedule(
     rooms,
     priorityResult
 );
+
+    exportResultsToJS(
+        resolveBackendDataPath().c_str(),
+        exams, examCount,
+        faculty, facultyCount,
+        rooms, roomCount,
+        conflictGraph,
+        schedule, success, greedyTimeMs,
+        priorityResult, prioritySuccess, priorityTimeMs
+    );
+
     return 0 ;
 }
